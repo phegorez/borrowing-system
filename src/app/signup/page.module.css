@@ -1,0 +1,7 @@
+.mainPage {
+    @apply flex justify-center items-center min-h-[100vh]
+}
+
+.isAlreadySignUp {
+    @apply font-bold transition-all duration-150 ease-in-out hover:text-[#00a96e] hover:underline
+}

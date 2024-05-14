@@ -1,0 +1,15 @@
+.mainPage {
+    @apply flex justify-center items-center min-h-[100vh]
+}
+
+.middleArticle {
+    @apply container flex flex-col text-center mx-auto
+}
+
+.title {
+    @apply text-4xl font-bold my-5
+}
+
+.btnGroup {
+    @apply flex justify-center gap-5 my-5
+}
