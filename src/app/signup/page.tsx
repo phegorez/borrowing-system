@@ -1,14 +1,17 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
-import { setDoc, doc } from 'firebase/firestore';
+import { setDoc, doc, getDoc } from 'firebase/firestore';
 
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation'
+import { useAuthState } from 'react-firebase-hooks-working/auth';
+import useAuthStore from '../stores/authStore/authStore';
 
 
 const SignUpPage = () => {
@@ -17,6 +20,11 @@ const SignUpPage = () => {
     const [email, setEmail] = useState<string>('')
     const [password, setPassword] = useState<string>('')
     const [confirmPassword, setConfirmPassword] = useState<string>('')
+
+    const [alreadyAuth] = useAuthState(auth);
+    const {currentlyUser, getCurrentlyUser} = useAuthStore()
+    const auths = getAuth();
+    const router = useRouter();
 
     const handleRegister = async (e: any) => {
 
@@ -49,9 +57,6 @@ const SignUpPage = () => {
             await createUserWithEmailAndPassword(auth, email, password);
             const user = auth.currentUser;
 
-            //test user auth output
-            // console.log(user);
-
             if (user) {
                 await setDoc(doc(db, 'User', user.uid), {
                     email: user.email,
@@ -68,11 +73,42 @@ const SignUpPage = () => {
             form.reset();
         } catch (error) {
             console.log(error);
-            toast.error(error as string, {
-                position: "bottom-center",
-            });
+            if (error.code === 'auth/email-already-in-use') {
+                toast.error(error, {
+                    position: "bottom-center",
+                });
+            }
         }
     }
+
+    useEffect(() => {
+        if (alreadyAuth) {
+            onAuthStateChanged(auths, async (user) => {
+                if (user) {
+                    const docRef = doc(db, 'User', user.uid);
+                    const docSnap = await getDoc(docRef);
+
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        // console.log('User data: ', userData);
+                        // router.replace(`dashboard/${userData.username}`);
+                        if(userData) {
+                            getCurrentlyUser(userData)
+                        }
+                        router.replace(`dashboard/${userData.username}`);
+                        // if(currentlyuser) {
+                        //     router.push(`dashboard/${currentlySignIn.username}`)
+                        // }
+                    }
+                } else {
+                    toast.success('logged out Successfully', {
+                        position: 'top-right',
+                        autoClose: 1800,
+                    });
+                }
+            })
+        }
+    }, [alreadyAuth])
 
     return (
         <main className={styles.mainPage}>
