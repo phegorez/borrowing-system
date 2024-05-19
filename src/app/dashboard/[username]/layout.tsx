@@ -7,33 +7,35 @@ import React, { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { sidebarMenus } from '@/app/constans'
 
-import { useAuthState } from 'react-firebase-hooks-working/auth'
-import { auth } from '@/app/firebase'
-
+import { useSelector, useDispatch } from 'react-redux'
+import { IRootState } from '@/app/configureStore'
+import { profileInterface } from '@/app/type'
 
 
 const layout = ({ children }: { children: React.ReactNode }) => {
 
+
     const { username } = useParams();
     const router = useRouter();
-    
-    const [alreadyAuth] = useAuthState(auth);
-    console.log(alreadyAuth)
+    const dispatch = useDispatch()
+
+    const isLogIn = useSelector<IRootState, boolean>(state => state.auth.isLoggedIn)
 
     useEffect(() => {
-        if(!alreadyAuth) {
-            router.replace('/signin')
+        if (!isLogIn) {
+            router.replace(`/`)
         }
-    }, [alreadyAuth])
+    }, [])
+
+
 
     return (
         <main className='container mx-auto'>
             <Navbar />
 
             <div className='flex'>
-                <Sidebar username = {username} sidebarMenus = {sidebarMenus} />
+                <Sidebar username={username} sidebarMenus={sidebarMenus} />
                 <div className='ml-5'>
-
                     {children}
                 </div>
             </div>

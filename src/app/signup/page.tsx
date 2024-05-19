@@ -4,14 +4,14 @@ import React, { useEffect, useState } from 'react';
 import styles from './page.module.css';
 import Link from 'next/link';
 
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../firebase';
-import { setDoc, doc, getDoc } from 'firebase/firestore';
-
 import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation'
-import { useAuthState } from 'react-firebase-hooks-working/auth';
-import useAuthStore from '../stores/authStore/authStore';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../configureStore';
+import { profileInterface } from '../type';
+import { useRouter } from 'next/navigation';
 
 
 const SignUpPage = () => {
@@ -21,10 +21,9 @@ const SignUpPage = () => {
     const [password, setPassword] = useState<string>('')
     const [confirmPassword, setConfirmPassword] = useState<string>('')
 
-    const [alreadyAuth] = useAuthState(auth);
-    const {currentlyUser, getCurrentlyUser} = useAuthStore()
-    const auths = getAuth();
     const router = useRouter();
+
+
 
     const handleRegister = async (e: any) => {
 
@@ -53,17 +52,25 @@ const SignUpPage = () => {
         }
 
         try {
-
             await createUserWithEmailAndPassword(auth, email, password);
-            const user = auth.currentUser;
+            const user = auth.currentUser!;
 
+            updateProfile(user, {
+                displayName: username
+            }) 
+
+            
             if (user) {
-                await setDoc(doc(db, 'User', user.uid), {
-                    email: user.email,
+                const docRef = doc(db, 'users', user.uid);
+                const newUser = {
                     username: username,
-                    photo: '',
-                    role: 'user'
-                });
+                    email: user.email,
+                    photo: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                    role: 'user',
+                    createdDate: new Date(),
+                    updatedAt: new Date()
+                }
+                await setDoc(docRef, newUser)
             }
             toast.success('Registration successfuly', {
                 position: 'top-right',
@@ -72,43 +79,23 @@ const SignUpPage = () => {
             const form = e.target;
             form.reset();
         } catch (error) {
-            console.log(error);
             if (error.code === 'auth/email-already-in-use') {
-                toast.error(error, {
-                    position: "bottom-center",
+                toast.error('email already in use', {
+                    position: "top-right",
+                    autoClose: 1800,
                 });
             }
         }
     }
 
-    useEffect(() => {
-        if (alreadyAuth) {
-            onAuthStateChanged(auths, async (user) => {
-                if (user) {
-                    const docRef = doc(db, 'User', user.uid);
-                    const docSnap = await getDoc(docRef);
+    const isLogIn = useSelector<IRootState, boolean>(state => state.auth.isLoggedIn)
+    const loggedInUserProfile = useSelector<IRootState, profileInterface>(state => state.auth.profile)
 
-                    if (docSnap.exists()) {
-                        const userData = docSnap.data();
-                        // console.log('User data: ', userData);
-                        // router.replace(`dashboard/${userData.username}`);
-                        if(userData) {
-                            getCurrentlyUser(userData)
-                        }
-                        router.replace(`dashboard/${userData.username}`);
-                        // if(currentlyuser) {
-                        //     router.push(`dashboard/${currentlySignIn.username}`)
-                        // }
-                    }
-                } else {
-                    toast.success('logged out Successfully', {
-                        position: 'top-right',
-                        autoClose: 1800,
-                    });
-                }
-            })
+    useEffect(() => {
+        if (isLogIn) {
+            router.replace(`dashboard/${loggedInUserProfile.id}`)
         }
-    }, [alreadyAuth])
+    }, [])
 
     return (
         <main className={styles.mainPage}>

@@ -1,24 +1,23 @@
 'use client'
 
+import { auth } from '@/app/firebase';
+import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+import { useDispatch } from 'react-redux';
 import React from 'react'
-import { auth } from '@/app/firebase'
-import useAuthStore from '@/app/stores/authStore/authStore';
+import { logOut } from '@/app/store/authSlice';
 
 
 
 const Navbar = () => {
 
     const route = useRouter()
-    const { setStatus } = useAuthStore()
+    const dispatch = useDispatch() 
 
     const handleLogout = async () => {
-        try {
-            await auth.signOut();
-            route.replace('/signin')
-        } catch(error) {
-            console.error("Error logging out:", error.message);
-        }
+        await signOut(auth)
+        dispatch(logOut())
+        route.replace('/')
     }
 
     return (

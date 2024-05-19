@@ -1,35 +1,31 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import styles from './page.module.css'
 import Link from 'next/link'
 
-import { auth, db } from '../firebase'
-import { getDoc, doc } from 'firebase/firestore';
-
 import { toast } from 'react-toastify'
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '../firebase'
 
+import { useDispatch, useSelector } from 'react-redux'
+import { signIn } from '../store/authSlice'
 
 import { useRouter } from 'next/navigation'
-import useAuthStore from '../stores/authStore/authStore'
+import { IRootState } from '../configureStore'
 
-import { useAuthState } from 'react-firebase-hooks-working/auth'
+import { objState, profileInterface } from '../type'
 
 const SignInPage = () => {
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [isReadySign, setIsReadySign] = useState<boolean>(false)
 
-    const [alreadyAuth] = useAuthState(auth);
-    console.log(alreadyAuth);
+    const dispatch = useDispatch();
+    const router = useRouter()
 
-    const {currentlyUser, getCurrentlyUser} = useAuthStore()
-
-    const router = useRouter();
-
-    const auths = getAuth();
+    const isLogIn = useSelector<IRootState, boolean>(state => state.auth.isLoggedIn)
+    const loggedInUserProfile = useSelector<IRootState, profileInterface>(state => state.auth.profile)
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -51,54 +47,38 @@ const SignInPage = () => {
         }
 
         try {
-            await signInWithEmailAndPassword(auths, email, password);
-
-            toast.success('Logged in Successfully', {
+            const result = await signInWithEmailAndPassword(auth, email, password)
+            if (result) {
+                const resultData = result.user
+                const userData = {
+                    id: resultData.uid,
+                    email: resultData.email,
+                }
+                dispatch(signIn(userData));
+                router.replace(`dashboard/${userData.id}`)
+            }
+            toast.success('Login successfuly', {
                 position: 'top-right',
-                autoClose: 1800,
+                autoClose: 1800
             });
-
-            setIsReadySign(true)
-
         } catch (error) {
             console.log(error);
             if (error.code === 'auth/invalid-credential') {
-                toast.error('Your email or password is incorrect', {
-                    position: 'top-right',
+                toast.error('invalid credential', {
+                    position: "top-right",
                     autoClose: 1800,
                 });
             }
         }
+
     };
 
+
     useEffect(() => {
-        if (isReadySign || alreadyAuth) {
-            onAuthStateChanged(auths, async (user) => {
-                if (user) {
-                    const docRef = doc(db, 'User', user.uid);
-                    const docSnap = await getDoc(docRef);
-
-                    if (docSnap.exists()) {
-                        const userData = docSnap.data();
-
-                        console.log(userData)
-                        getCurrentlyUser(userData)
-                        router.replace(`/dashboard/${userData.username}`);
-
-                    }
-                    setIsReadySign(true)
-                } else {
-                    setIsReadySign(false)
-                    toast.success('logged out Successfully', {
-                        position: 'top-right',
-                        autoClose: 1800,
-                    });
-                }
-            })
+        if (isLogIn) {
+            router.replace(`dashboard/${loggedInUserProfile.id}`)
         }
-    }, [isReadySign || alreadyAuth])
-    console.log(currentlyUser);
-    
+    }, [])
 
     return (
         <main className={styles.mainPage}>
