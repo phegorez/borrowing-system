@@ -1,36 +1,33 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
-import { userInterface, profileInterface } from '@/app/type'
+import { profileInterface } from '@/app/type'
 
 const authSlice = createSlice({
     name: "auth",
     initialState: {
-        user: <userInterface>{},
         profile: <profileInterface>{},
         isLoggedIn: false
     },
     reducers: {
-        signIn: (state, action) => {
-            const signInUser : userInterface = {
-                id: action.payload.id,
-                email: action.payload.email
-            }
+        signIn: (state) => {
             state.isLoggedIn = true;
-            state.user = signInUser;
         },
         getCurrent: (state, action) => {
-            const currentUser : profileInterface = {
-                id: action.payload.id,
+            const currentUser: profileInterface = {
+                uid: action.payload.uid,
                 email: action.payload.email,
-                displayName: action.payload.displayName
+                photo: action.payload.photo,
+                role: action.payload.role,
+                displayName: action.payload.username,
+                createdDate: action.payload.createdDate,
+                updatedDate: action.payload.updatedDate
             }
             state.isLoggedIn = true;
             state.profile = currentUser;
         },
         logOut: (state) => {
             state.isLoggedIn = false;
-            state.user = <userInterface>{};
             state.profile = <profileInterface>{};
         }
     },

@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getCurrent } from '../store/authSlice';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const useAuthListener = () => {
     const dispatch = useDispatch();
@@ -12,12 +13,26 @@ const useAuthListener = () => {
             return new Promise((resolve) => {
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
-                        const getCurrentUser = {
-                            id: user.uid,
-                            email: user.email,
-                            displayName: user.displayName
+
+                        const docRef = doc(db, 'users', user.uid)
+                        const docSnap = await getDoc(docRef)
+
+                        if (docSnap.exists()) {
+                            const userData = docSnap.data()
+                            console.log('Exists user createdDate : ', userData.createdDate.toDate().toLocaleString());
+                            const getCurrentUser = {
+                                uid: userData.uid,
+                                email: userData.email,
+                                photo: userData.photo,
+                                role: userData.role,
+                                displayName: userData.username,
+                                createdDate: userData.createdDate.toDate().toLocaleString(),
+                                updatedDate: userData.updatedDate ? userData.updatedDate.toDate().toLocaleString() : null
+                            }
+                            dispatch(getCurrent(getCurrentUser));
                         }
-                        dispatch(getCurrent(getCurrentUser));
+
+
                         resolve(true);
                     } else {
                         resolve(false);

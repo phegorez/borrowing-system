@@ -1,12 +1,11 @@
-export interface userInterface {
-    id: string,
-    email: string
-}
-
 export interface profileInterface {
-    id: string,
+    uid: string,
     email: string,
-    displayName: string
+    photo: string,
+    role: string,
+    displayName: string, 
+    createdDate: string,
+    updatedDate: string
 }
 
 export interface AuthState {

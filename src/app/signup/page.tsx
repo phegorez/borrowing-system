@@ -93,7 +93,7 @@ const SignUpPage = () => {
 
     useEffect(() => {
         if (isLogIn) {
-            router.replace(`dashboard/${loggedInUserProfile.id}`)
+            router.replace(`dashboard/${loggedInUserProfile.uid}`)
         }
     }, [])
 
