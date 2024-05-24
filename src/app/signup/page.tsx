@@ -78,6 +78,7 @@ const SignUpPage = () => {
             });
             const form = e.target;
             form.reset();
+            router.replace(`/signin`)
         } catch (error) {
             if (error.code === 'auth/email-already-in-use') {
                 toast.error('email already in use', {
@@ -93,7 +94,7 @@ const SignUpPage = () => {
 
     useEffect(() => {
         if (isLogIn) {
-            router.replace(`dashboard/${loggedInUserProfile.uid}`)
+            router.replace(`views/${loggedInUserProfile.uid}`)
         }
     }, [])
 

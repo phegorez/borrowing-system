@@ -19,13 +19,12 @@ const useAuthListener = () => {
 
                         if (docSnap.exists()) {
                             const userData = docSnap.data()
-                            console.log('Exists user createdDate : ', userData.createdDate.toDate().toLocaleString());
                             const getCurrentUser = {
-                                uid: userData.uid,
+                                uid: user.uid,
                                 email: userData.email,
                                 photo: userData.photo,
                                 role: userData.role,
-                                displayName: userData.username,
+                                displayName: user.displayName,
                                 createdDate: userData.createdDate.toDate().toLocaleString(),
                                 updatedDate: userData.updatedDate ? userData.updatedDate.toDate().toLocaleString() : null
                             }

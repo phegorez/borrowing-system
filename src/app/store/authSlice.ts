@@ -19,7 +19,7 @@ const authSlice = createSlice({
                 email: action.payload.email,
                 photo: action.payload.photo,
                 role: action.payload.role,
-                displayName: action.payload.username,
+                displayName: action.payload.displayName,
                 createdDate: action.payload.createdDate,
                 updatedDate: action.payload.updatedDate
             }

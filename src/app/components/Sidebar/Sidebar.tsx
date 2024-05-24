@@ -1,8 +1,11 @@
 'use client'
 
 import React from 'react'
-import { sidebarMenus } from '@/app/constans'
+import { sidebarMenus, sidebarAdminMenus } from '@/app/constans'
 import Link from 'next/link'
+import { useSelector } from 'react-redux'
+import { IRootState } from '@/app/configureStore'
+import { AuthState, profileInterface } from '@/app/type'
 
 interface sidebarMenusInt {
     id: number,
@@ -10,14 +13,20 @@ interface sidebarMenusInt {
     routeName: string
 }
 
+
+
 const Sidebar = ({ username, sidebarMenus }: { username : string | string[], sidebarMenus: sidebarMenusInt[] }) => {
+
+    const profile = useSelector<IRootState, profileInterface>(state => state.auth.profile)
 
     return (
         <div>
             <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
                 {/* Sidebar content here */}
-                {sidebarMenus.map(menu => (
-                    <li key={menu.id}><Link href={`/dashboard/${username}/${menu.routeName}`}>{menu.title}</Link></li>
+                {profile.role === 'admin' ? sidebarAdminMenus.map(menu => (
+                    <li key={menu.id}><Link href={`/dashboard/${menu.routeName}`}>{menu.title}</Link></li>
+                )) : sidebarMenus.map(menu => (
+                    <li key={menu.id}><Link href={`/views/${username}/${menu.routeName}`}>{menu.title}</Link></li>
                 ))}
             </ul>
         </div>

@@ -2,7 +2,7 @@ import React from 'react'
 
 const userDashboardPage = () => {
     return (
-        <div>userDashboardP</div>
+        <div>This is admin dashboard</div>
     )
 }
 

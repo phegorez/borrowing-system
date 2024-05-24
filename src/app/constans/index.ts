@@ -15,3 +15,17 @@ export const sidebarMenus = [
         routeName: 'my_items'
     }
 ]
+
+// Suggested code may be subject to a license. Learn more: ~LicenseLog:1558653547.
+export const sidebarAdminMenus = [
+    {
+        id:1,
+        title: 'View Request',
+        routeName: 'view_request'
+    },
+    {
+        id:2,
+        title: 'Storage',
+        routeName: 'storage'
+    },
+]

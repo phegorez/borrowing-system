@@ -51,7 +51,7 @@ const SignInPage = () => {
             if (result) {
                 const resultData = result.user
                 dispatch(signIn());
-                router.replace(`dashboard/${resultData.uid}`)
+                router.replace(`views/${resultData.uid}`)
             }
             toast.success('Login successfuly', {
                 position: 'top-right',
@@ -72,7 +72,7 @@ const SignInPage = () => {
 
     useEffect(() => {
         if (isLogIn) {
-            router.replace(`dashboard/${loggedInUserProfile.uid}`)
+            router.replace(`views/${loggedInUserProfile.uid}`)
         }
     }, [])
 
